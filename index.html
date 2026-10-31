@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mamont1k — python developer</title>
+  <meta name="description" content="Личная страница и портфолио mamont1k — Python разработчик.">
+  <meta property="og:title" content="mamont1k — python developer">
+  <meta property="og:description" content="Личная страница mamont1k. Стек, проекты, контакты.">
+  <meta property="og:image" content="https://avatars.githubusercontent.com/u/81989649?v=4">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/81989649?v=4">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090a0f;
+      --card-bg: rgba(16, 18, 27, 0.65);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-hover: rgba(255, 255, 255, 0.2);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #8b5cf6;
+      --accent-glow: rgba(139, 92, 246, 0.4);
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+      user-select: none;
+    }
+
+    /* Background video & overlays */
+    .bg-video-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bg-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.4) contrast(1.1) saturate(1.15);
+      transform: scale(1.02);
+      transition: filter 0.5s ease;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background: radial-gradient(circle at center, rgba(9, 10, 15, 0.4) 0%, rgba(9, 10, 15, 0.85) 100%);
+      pointer-events: none;
+    }
+
+    /* Ambient cursor glow */
+    .cursor-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.12), transparent 70%);
+      pointer-events: none;
+      z-index: 2;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.3s ease;
+      opacity: 0;
+    }
+
+    /* Click to Enter Overlay */
+    .enter-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(9, 10, 15, 0.94);
+      backdrop-filter: blur(25px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.7s;
+    }
+
+    .enter-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .enter-text {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    .enter-sub {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(0.99); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
+
+    /* Main Container */
+    .container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 640px;
+      padding: 24px 16px;
+    }
+
+    .profile-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .profile-card:hover {
+      border-color: var(--card-border-hover);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(139, 92, 246, 0.1);
+    }
+
+    /* Header Profile */
+    .profile-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 108px;
+      height: 108px;
+      margin-bottom: 16px;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+      position: relative;
+      z-index: 2;
+    }
+
+    .avatar-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(59, 130, 246, 0.2), transparent);
+      z-index: 1;
+      filter: blur(2px);
+      animation: rotateRing 8s linear infinite;
+    }
+
+    @keyframes rotateRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .status-dot {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
+      background: #10b981;
+      border: 3px solid #11131c;
+      border-radius: 50%;
+      z-index: 3;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+    }
+
+    .username-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .username {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+    }
+
+    .badge-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #c4b5fd;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tagline {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    /* Badges row */
+    .badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .badge-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      color: #e2e8f0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .badge-chip:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Navigation Tabs */
+    .tabs-nav {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 4px;
+      margin: 24px 0 20px 0;
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-main);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Tab Panes */
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Social icons row in main tab */
+    .social-links {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .social-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 500;
+      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .social-btn svg {
+      width: 22px;
+      height: 22px;
+      transition: transform 0.2s ease;
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+    }
+
+    .social-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .social-btn:hover svg {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6));
+    }
+
+    /* Discord Copy Box */
+    .discord-box {
+      background: rgba(88, 101, 242, 0.08);
+      border: 1px solid rgba(88, 101, 242, 0.2);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 20px;
+    }
+
+    .discord-box:hover {
+      background: rgba(88, 101, 242, 0.15);
+      border-color: rgba(88, 101, 242, 0.4);
+    }
+
+    .discord-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .discord-left svg {
+      width: 24px;
+      height: 24px;
+      color: #5865f2;
+    }
+
+    .discord-info {
+      text-align: left;
+    }
+
+    .discord-tag {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #fff;
+      font-family: var(--font-mono);
+    }
+
+    .discord-hint {
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+
+    .copy-badge {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: #e2e8f0;
+    }
+
+    /* Skills Grid */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .skill-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 12px 14px;
+      text-align: left;
+      transition: background 0.2s;
+    }
+
+    .skill-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .skill-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .skill-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Projects List */
+    .project-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: left;
+      margin-bottom: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .project-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .project-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .project-name {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .project-tag {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      background: rgba(139, 92, 246, 0.15);
+      color: #c4b5fd;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .project-desc {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      line-height: 1.45;
+    }
+
+    /* Audio Player Widget */
+    .player-widget {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .play-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .play-btn:hover {
+      background: #fff;
+      color: #000;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+    }
+
+    .player-meta {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
+    }
+
+    .track-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Audio visualizer bars */
+    .equalizer {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 12px;
+    }
+
+    .eq-bar {
+      width: 2px;
+      background: #8b5cf6;
+      border-radius: 1px;
+      height: 3px;
+      transition: height 0.1s ease;
+    }
+
+    .equalizer.playing .eq-bar:nth-child(1) { animation: eqAnim 0.7s infinite alternate ease-in-out; }
+    .equalizer.playing .eq-bar:nth-child(2) { animation: eqAnim 0.5s infinite alternate ease-in-out 0.2s; }
+    .equalizer.playing .eq-bar:nth-child(3) { animation: eqAnim 0.8s infinite alternate ease-in-out 0.4s; }
+    .equalizer.playing .eq-bar:nth-child(4) { animation: eqAnim 0.6s infinite alternate ease-in-out 0.1s; }
+
+    @keyframes eqAnim {
+      0% { height: 2px; }
+      100% { height: 12px; }
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin-top: 6px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #8b5cf6, #ec4899);
+      border-radius: 2px;
+    }
+
+    .time-wrap {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .volume-slider {
+      width: 60px;
+      accent-color: #8b5cf6;
+      cursor: pointer;
+    }
+
+    /* Footer Stats & Copyright */
+    .card-footer {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: #64748b;
+      font-family: var(--font-mono);
+    }
+
+    .card-footer a {
+      color: #94a3b8;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .card-footer a:hover {
+      color: #fff;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(50px);
+      background: rgba(16, 18, 27, 0.9);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(139, 92, 246, 0.2);
+      backdrop-filter: blur(16px);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 200;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 12px;
+      }
+      .profile-card {
+        padding: 24px 18px;
+        border-radius: 20px;
+      }
+      .skills-grid {
+        grid-template-columns: 1fr;
+      }
+      .social-links {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .volume-slider {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Video & Dark Backdrop -->
+  <div class="bg-video-wrap">
+    <video id="bgVideo" class="bg-video" autoplay loop muted playsinline>
+      <source src="https://r2.guns.lol/6470427b-4a43-4b37-b452-40f4be7cde13.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="bg-overlay"></div>
+
+  <!-- Interactive Spotlight Glow -->
+  <div id="cursorGlow" class="cursor-glow"></div>
+
+  <!-- Click to Enter Screen (Autoplay bypass) -->
+  <div id="enterScreen" class="enter-screen">
+    <div class="enter-text">[ click to enter ]</div>
+    <div class="enter-sub">mamont1k.me</div>
+  </div>
+
+  <!-- Background Audio Track -->
+  <audio id="audioTrack" loop preload="auto">
+    <source src="https://r2.guns.lol/6b8d5128-cf1f-48d8-886d-214fdcf79bb1.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Main Card -->
+  <main class="container">
+    <div class="profile-card">
+
+      <!-- Header Section -->
+      <div class="profile-header">
+        <div class="avatar-wrapper">
+          <div class="avatar-ring"></div>
+          <img src="https://avatars.githubusercontent.com/u/81989649?v=4" alt="mamont1k avatar" class="avatar-img" onerror="this.src='https://github.com/itai215.png'">
+          <div class="status-dot" title="Online"></div>
+        </div>
+
+        <div class="username-wrap">
+          <h1 class="username">mamont1k</h1>
+          <span class="badge-icon">dev</span>
+        </div>
+
+        <p class="tagline">Python developer & backend enthusiast</p>
+
+        <div class="badges-row">
+          <span class="badge-chip">🐍 Python</span>
+          <span class="badge-chip">⚡ FastAPI / AsyncIO</span>
+          <span class="badge-chip">🐳 Docker / Linux</span>
+          <span class="badge-chip">🎮 HypeSquad</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="tabs-nav">
+        <button class="tab-btn active" data-tab="tab-main">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          Инфо
+        </button>
+        <button class="tab-btn" data-tab="tab-stack">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          Стек
+        </button>
+        <button class="tab-btn" data-tab="tab-projects">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          Проекты
+        </button>
+      </nav>
+
+      <!-- TAB 1: Главная & Контакты -->
+      <div id="tab-main" class="tab-pane active">
+        <!-- Social Buttons Grid -->
+        <div class="social-links">
+          <a href="https://github.com/itai215" target="_blank" rel="noopener noreferrer" class="social-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            <span>GitHub</span>
+          </a>
+
+          <a href="https://steamcommunity.com/id/mastyrbist" target="_blank" rel="noopener noreferrer" class="social-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.21 17.32L7 16.8a2.13 2.13 0 1 0 1.17-2.93l1.28.53a1.58 1.58 0 0 1-1.22 2.92z"/><path d="M12 2a10 10 0 0 0-10 9.34l5.38 2.21a2.31 2.31 0 0 1 .47-.24A2.62 2.62 0 0 1 9 13.1l2.44-3.56a3.8 3.8 0 1 1 3.8 3.8h-.08l-3.51 2.5a2.77 2.77 0 0 1-5.47.68l-3.77-1.6A10 10 0 1 0 12 2z"/><path d="M17.79 9.5a2.53 2.53 0 1 0-2.53 2.5a2.54 2.54 0 0 0 2.53-2.5zm-4.42 0a1.9 1.9 0 1 1 1.9 1.91a1.9 1.9 0 0 1-1.9-1.92z"/></svg>
+            <span>Steam</span>
+          </a>
+
+          <a href="https://discord.com/invite/6G7dU3k3Zc" target="_blank" rel="noopener noreferrer" class="social-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            <span>Сервер</span>
+          </a>
+        </div>
+
+        <!-- Copy Discord Tag -->
+        <div class="discord-box" id="discordCopyBtn" title="Кликните чтобы скопировать">
+          <div class="discord-left">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            <div class="discord-info">
+              <div class="discord-tag">_mamont1k_</div>
+              <div class="discord-hint">Discord профиль</div>
+            </div>
+          </div>
+          <span class="copy-badge">Копировать</span>
+        </div>
+      </div>
+
+      <!-- TAB 2: Технологический стек -->
+      <div id="tab-stack" class="tab-pane">
+        <div class="skills-grid">
+          <div class="skill-card">
+            <div class="skill-title">🐍 Backend</div>
+            <div class="skill-desc">Python 3.11+, FastAPI, aiohttp, AsyncIO, REST API, парсинг данных.</div>
+          </div>
+          <div class="skill-card">
+            <div class="skill-title">🤖 Боты & Автоматизация</div>
+            <div class="skill-desc">Aiogram, Telethon, Selenium/Playwright, автопостинг, скрипты.</div>
+          </div>
+          <div class="skill-card">
+            <div class="skill-title">🗄️ Базы данных</div>
+            <div class="skill-desc">PostgreSQL, Redis, SQLite, SQLAlchemy, оптимизация запросов.</div>
+          </div>
+          <div class="skill-card">
+            <div class="skill-title">⚙️ Инфраструктура</div>
+            <div class="skill-desc">Docker, Linux (Ubuntu/Debian), Git, Nginx, Coolify, Bash.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Проекты -->
+      <div id="tab-projects" class="tab-pane">
+        <div class="project-card">
+          <div class="project-header">
+            <span class="project-name">HunterWorlds Core & Infrastructure</span>
+            <span class="project-tag">Python / Java</span>
+          </div>
+          <div class="project-desc">
+            Игровая сеть, кастомные микросервисы, проксирование и аналитика для высоконагруженных игровых платформ.
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-header">
+            <span class="project-name">TikTok Media Automation Engine</span>
+            <span class="project-tag">Python / AI</span>
+          </div>
+          <div class="project-desc">
+            Автономный пайплайн генерации, монтажа и публикации коротких видео с AI-аналитикой вовлечения.
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-header">
+            <span class="project-name">mamont1k.me</span>
+            <span class="project-tag">HTML / CSS / JS</span>
+          </div>
+          <div class="project-desc">
+            Персональный сайт-визитка с медиаплеером, кастомными анимациями и адаптивным дизайном.
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio Player Widget -->
+      <div class="player-widget">
+        <button id="playBtn" class="play-btn" title="Play/Pause">
+          <svg id="playIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        </button>
+
+        <div class="player-meta">
+          <div class="track-title">
+            <span>Кабилджон</span>
+            <div id="equalizer" class="equalizer">
+              <span class="eq-bar"></span>
+              <span class="eq-bar"></span>
+              <span class="eq-bar"></span>
+              <span class="eq-bar"></span>
+            </div>
+          </div>
+          <div class="progress-bar-wrap" id="progressWrap">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+        </div>
+
+        <span class="time-wrap" id="timeDisplay">0:00</span>
+
+        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="0.7" title="Громкость">
+      </div>
+
+      <!-- Card Footer -->
+      <footer class="card-footer">
+        <span>© 2026 mamont1k</span>
+        <a href="https://mamont1k.me">mamont1k.me</a>
+      </footer>
+
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span id="toastMsg">Ник скопирован!</span>
+  </div>
+
+  <script>
+    // Audio Player Elements
+    const audio = document.getElementById('audioTrack');
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const progressBar = document.getElementById('progressBar');
+    const progressWrap = document.getElementById('progressWrap');
+    const timeDisplay = document.getElementById('timeDisplay');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const equalizer = document.getElementById('equalizer');
+
+    audio.volume = 0.7;
+
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return '0:00';
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function togglePlay() {
+      if (audio.paused) {
+        audio.play().then(() => {
+          playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+          equalizer.classList.add('playing');
+        }).catch(err => console.log('Autoplay blocked', err));
+      } else {
+        audio.pause();
+        playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+        equalizer.classList.remove('playing');
+      }
+    }
+
+    playBtn.addEventListener('click', togglePlay);
+
+    audio.addEventListener('timeupdate', () => {
+      if (audio.duration) {
+        const percent = (audio.currentTime / audio.duration) * 100;
+        progressBar.style.width = percent + '%';
+        timeDisplay.textContent = formatTime(audio.currentTime);
+      }
+    });
+
+    progressWrap.addEventListener('click', (e) => {
+      const rect = progressWrap.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const width = rect.width;
+      audio.currentTime = (clickX / width) * audio.duration;
+    });
+
+    volumeSlider.addEventListener('input', (e) => {
+      audio.volume = parseFloat(e.target.value);
+    });
+
+    // Enter Screen (User interaction enables autoplay)
+    const enterScreen = document.getElementById('enterScreen');
+    const bgVideo = document.getElementById('bgVideo');
+
+    enterScreen.addEventListener('click', () => {
+      enterScreen.classList.add('hidden');
+      bgVideo.play();
+      togglePlay();
+    });
+
+    // Tabs Switcher
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabPanes.forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        const targetId = btn.getAttribute('data-tab');
+        document.getElementById(targetId).classList.add('active');
+      });
+    });
+
+    // Copy Discord to clipboard
+    const discordCopyBtn = document.getElementById('discordCopyBtn');
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+
+    function showToast(text) {
+      toastMsg.textContent = text;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    discordCopyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText('_mamont1k_').then(() => {
+        showToast('Discord ник скопирован: _mamont1k_');
+      }).catch(() => {
+        showToast('Скопируйте вручную: _mamont1k_');
+      });
+    });
+
+    // Cursor Spotlight Effect
+    const cursorGlow = document.getElementById('cursorGlow');
+    window.addEventListener('mousemove', (e) => {
+      cursorGlow.style.opacity = '1';
+      cursorGlow.style.left = e.clientX + 'px';
+      cursorGlow.style.top = e.clientY + 'px';
+    });
+
+    window.addEventListener('mouseleave', () => {
+      cursorGlow.style.opacity = '0';
+    });
+  </script>
+</body>
+</html>
