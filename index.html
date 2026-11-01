@@ -43,7 +43,7 @@
       justify-content: center;
       overflow-x: hidden;
       position: relative;
-      user-select: none;
+      user-select: text;
     }
 
     /* Background video & overlays */
@@ -275,6 +275,8 @@
 
     /* Navigation Tabs */
     .tabs-nav {
+      position: relative;
+      isolation: isolate;
       display: flex;
       gap: 6px;
       background: rgba(0, 0, 0, 0.25);
@@ -286,6 +288,7 @@
 
     .tab-btn {
       flex: 1;
+      min-width: 0;
       background: transparent;
       border: none;
       color: var(--text-muted);
@@ -299,7 +302,9 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: all 0.2s ease;
+      min-height: 44px;
+      position: relative;
+      transition: color 180ms ease, transform 180ms ease;
     }
 
     .tab-btn:hover {
@@ -309,14 +314,13 @@
 
     .tab-btn.active {
       color: #fff;
-      background: rgba(255, 255, 255, 0.12);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
     }
 
     /* Tab Panes */
     .tab-pane {
       display: none;
-      animation: fadeIn 0.25s ease-out;
+      animation: fadeIn 280ms cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .tab-pane.active {
@@ -669,6 +673,40 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    .tab-indicator {
+      position: absolute;
+      inset: 4px auto 4px 4px;
+      width: calc((100% - 20px) / 3);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: -1;
+      transform: translateX(calc(var(--tab-index, 0) * (100% + 6px)));
+      transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .tab-pane.active > *, .tab-pane.active .skill-card {
+      animation: fadeIn 360ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    }
+    .tab-pane.active > :nth-child(2), .tab-pane.active .skill-card:nth-child(2) { animation-delay: 45ms; }
+    .tab-pane.active > :nth-child(3), .tab-pane.active .skill-card:nth-child(3) { animation-delay: 90ms; }
+    .tab-pane.active > :nth-child(4), .tab-pane.active .skill-card:nth-child(4) { animation-delay: 135ms; }
+    .project-card { display: block; text-decoration: none; color: inherit; }
+    .project-header { gap: 12px; flex-wrap: wrap; }
+    .project-name { overflow-wrap: anywhere; }
+    .discord-box { width: 100%; font: inherit; color: inherit; }
+    .enter-screen { border: 0; color: inherit; font: inherit; width: 100%; }
+    .play-btn { width: 44px; height: 44px; }
+    :focus-visible { outline: 2px solid #c4b5fd; outline-offset: 4px; }
+    :is(.tab-btn, .social-btn, .project-card, .discord-box, .play-btn):active { transform: scale(0.97); }
+    :is(.social-btn, .project-card, .discord-box):focus-visible { background: rgba(139, 92, 246, 0.15); }
+    [hidden] { display: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .bg-video-wrap, .cursor-glow { display: none; }
+    }
+    @media (pointer: coarse) { .cursor-glow { display: none; } }
+
     @media (max-width: 640px) {
       .container {
         padding: 12px;
@@ -703,10 +741,10 @@
   <div id="cursorGlow" class="cursor-glow"></div>
 
   <!-- Click to Enter Screen (Autoplay bypass) -->
-  <div id="enterScreen" class="enter-screen">
-    <div class="enter-text">[ click to enter ]</div>
-    <div class="enter-sub">mamont1k.me</div>
-  </div>
+  <button id="enterScreen" class="enter-screen" type="button" autofocus>
+    <span class="enter-text">[ click to enter ]</span>
+    <span class="enter-sub">mamont1k.me · Enter / Space</span>
+  </button>
 
   <!-- Background Audio Track -->
   <audio id="audioTrack" loop preload="auto">
@@ -714,7 +752,7 @@
   </audio>
 
   <!-- Main Card -->
-  <main class="container">
+  <main class="container" inert>
     <div class="profile-card">
 
       <!-- Header Section -->
@@ -722,7 +760,6 @@
         <div class="avatar-wrapper">
           <div class="avatar-ring"></div>
           <img src="https://avatars.githubusercontent.com/u/81989649?v=4" alt="mamont1k avatar" class="avatar-img" onerror="this.src='https://github.com/itai215.png'">
-          <div class="status-dot" title="Online"></div>
         </div>
 
         <div class="username-wrap">
@@ -741,23 +778,24 @@
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="tabs-nav">
-        <button class="tab-btn active" data-tab="tab-main">
+      <nav class="tabs-nav" role="tablist" aria-label="Разделы профиля">
+        <span class="tab-indicator" aria-hidden="true"></span>
+        <button class="tab-btn active" data-tab="tab-main" id="button-main" role="tab" aria-controls="tab-main" aria-selected="true" tabindex="0">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
           Инфо
         </button>
-        <button class="tab-btn" data-tab="tab-stack">
+        <button class="tab-btn" data-tab="tab-stack" id="button-stack" role="tab" aria-controls="tab-stack" aria-selected="false" tabindex="-1">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
           Стек
         </button>
-        <button class="tab-btn" data-tab="tab-projects">
+        <button class="tab-btn" data-tab="tab-projects" id="button-projects" role="tab" aria-controls="tab-projects" aria-selected="false" tabindex="-1">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
           Проекты
         </button>
       </nav>
 
       <!-- TAB 1: Главная & Контакты -->
-      <div id="tab-main" class="tab-pane active">
+      <div id="tab-main" class="tab-pane active" role="tabpanel" aria-labelledby="button-main" tabindex="0">
         <!-- Social Buttons Grid -->
         <div class="social-links">
           <a href="https://github.com/itai215" target="_blank" rel="noopener noreferrer" class="social-btn">
@@ -777,7 +815,7 @@
         </div>
 
         <!-- Copy Discord Tag -->
-        <div class="discord-box" id="discordCopyBtn" title="Кликните чтобы скопировать">
+        <button type="button" class="discord-box" id="discordCopyBtn" title="Скопировать Discord ник">
           <div class="discord-left">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
             <div class="discord-info">
@@ -786,11 +824,11 @@
             </div>
           </div>
           <span class="copy-badge">Копировать</span>
-        </div>
+        </button>
       </div>
 
       <!-- TAB 2: Технологический стек -->
-      <div id="tab-stack" class="tab-pane">
+      <div id="tab-stack" class="tab-pane" role="tabpanel" aria-labelledby="button-stack" tabindex="0" hidden>
         <div class="skills-grid">
           <div class="skill-card">
             <div class="skill-title">🐍 Backend</div>
@@ -812,41 +850,43 @@
       </div>
 
       <!-- TAB 3: Проекты -->
-      <div id="tab-projects" class="tab-pane">
-        <div class="project-card">
+      <div id="tab-projects" class="tab-pane" role="tabpanel" aria-labelledby="button-projects" tabindex="0" hidden>
+        <a class="project-card" href="https://github.com/itai215/MultiTool" target="_blank" rel="noopener noreferrer">
           <div class="project-header">
-            <span class="project-name">HunterWorlds Core & Infrastructure</span>
-            <span class="project-tag">Python / Java</span>
+            <span class="project-name">MultiTool ↗</span>
+            <span class="project-tag">Python</span>
           </div>
-          <div class="project-desc">
-            Игровая сеть, кастомные микросервисы, проксирование и аналитика для высоконагруженных игровых платформ.
-          </div>
-        </div>
+          <div class="project-desc">Multi-Tool by Itai — набор инструментов на Python с запуском через start.bat.</div>
+        </a>
 
-        <div class="project-card">
+        <a class="project-card" href="https://github.com/itai215/AHK-mw" target="_blank" rel="noopener noreferrer">
           <div class="project-header">
-            <span class="project-name">TikTok Media Automation Engine</span>
-            <span class="project-tag">Python / AI</span>
+            <span class="project-name">AHK-mw ↗</span>
+            <span class="project-tag">AutoHotkey</span>
           </div>
-          <div class="project-desc">
-            Автономный пайплайн генерации, монтажа и публикации коротких видео с AI-аналитикой вовлечения.
-          </div>
-        </div>
+          <div class="project-desc">Бинды для администраторов и архитекторов MW: горячие клавиши для ответов и проверки построек.</div>
+        </a>
 
-        <div class="project-card">
+        <a class="project-card" href="https://github.com/itai215/Itzhak-navon" target="_blank" rel="noopener noreferrer">
           <div class="project-header">
-            <span class="project-name">mamont1k.me</span>
-            <span class="project-tag">HTML / CSS / JS</span>
+            <span class="project-name">Itzhak-navon ↗</span>
+            <span class="project-tag">GDScript / Godot 4</span>
           </div>
-          <div class="project-desc">
-            Персональный сайт-визитка с медиаплеером, кастомными анимациями и адаптивным дизайном.
+          <div class="project-desc">Образовательная игра о жизни Ицхака Навона: исследование локаций и викторины в стиле Undertale.</div>
+        </a>
+
+        <a class="project-card" href="https://github.com/itai215/artix-bspwm-dotfiles" target="_blank" rel="noopener noreferrer">
+          <div class="project-header">
+            <span class="project-name">artix-bspwm-dotfiles ↗</span>
+            <span class="project-tag">CSS · fork</span>
           </div>
-        </div>
+          <div class="project-desc">Форк минималистичной конфигурации Artix Linux с bspwm для рабочего окружения разработчика.</div>
+        </a>
       </div>
 
       <!-- Audio Player Widget -->
       <div class="player-widget">
-        <button id="playBtn" class="play-btn" title="Play/Pause">
+        <button id="playBtn" class="play-btn" title="Play/Pause" aria-label="Включить или приостановить музыку">
           <svg id="playIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
         </button>
 
@@ -880,7 +920,7 @@
   </main>
 
   <!-- Toast -->
-  <div id="toast" class="toast">
+  <div id="toast" class="toast" role="status" aria-live="polite">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
     <span id="toastMsg">Ник скопирован!</span>
   </div>
@@ -929,6 +969,7 @@
     });
 
     progressWrap.addEventListener('click', (e) => {
+      if (!Number.isFinite(audio.duration)) return;
       const rect = progressWrap.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const width = rect.width;
@@ -942,10 +983,19 @@
     // Enter Screen (User interaction enables autoplay)
     const enterScreen = document.getElementById('enterScreen');
     const bgVideo = document.getElementById('bgVideo');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    function syncMotion() {
+      if (reducedMotion.matches) bgVideo.pause();
+      else bgVideo.play().catch(() => {});
+    }
+    reducedMotion.addEventListener('change', syncMotion);
+    syncMotion();
 
     enterScreen.addEventListener('click', () => {
       enterScreen.classList.add('hidden');
-      bgVideo.play();
+      document.querySelector('main').inert = false;
+      document.querySelector('.tab-btn.active').focus();
+      if (!reducedMotion.matches) bgVideo.play().catch(() => {});
       togglePlay();
     });
 
@@ -953,14 +1003,33 @@
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabPanes = document.querySelectorAll('.tab-pane');
 
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        tabBtns.forEach(b => b.classList.remove('active'));
-        tabPanes.forEach(p => p.classList.remove('active'));
+    function selectTab(btn) {
+      tabBtns.forEach((tab, index) => {
+        const selected = tab === btn;
+        tab.classList.toggle('active', selected);
+        tab.setAttribute('aria-selected', String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        if (selected) tab.parentElement.style.setProperty('--tab-index', index);
+      });
+      tabPanes.forEach(pane => {
+        const selected = pane.id === btn.dataset.tab;
+        pane.hidden = !selected;
+        pane.classList.toggle('active', selected);
+      });
+    }
 
-        btn.classList.add('active');
-        const targetId = btn.getAttribute('data-tab');
-        document.getElementById(targetId).classList.add('active');
+    tabBtns.forEach((btn, index) => {
+      btn.addEventListener('click', () => selectTab(btn));
+      btn.addEventListener('keydown', event => {
+        let next;
+        if (event.key === 'ArrowRight') next = (index + 1) % tabBtns.length;
+        if (event.key === 'ArrowLeft') next = (index - 1 + tabBtns.length) % tabBtns.length;
+        if (event.key === 'Home') next = 0;
+        if (event.key === 'End') next = tabBtns.length - 1;
+        if (next === undefined) return;
+        event.preventDefault();
+        selectTab(tabBtns[next]);
+        tabBtns[next].focus();
       });
     });
 
@@ -969,23 +1038,27 @@
     const toast = document.getElementById('toast');
     const toastMsg = document.getElementById('toastMsg');
 
+    let toastTimer;
     function showToast(text) {
+      clearTimeout(toastTimer);
       toastMsg.textContent = text;
       toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2500);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
-    discordCopyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText('_mamont1k_').then(() => {
+    discordCopyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText('_mamont1k_');
         showToast('Discord ник скопирован: _mamont1k_');
-      }).catch(() => {
+      } catch {
         showToast('Скопируйте вручную: _mamont1k_');
-      });
+      }
     });
 
     // Cursor Spotlight Effect
     const cursorGlow = document.getElementById('cursorGlow');
     window.addEventListener('mousemove', (e) => {
+      if (reducedMotion.matches) return;
       cursorGlow.style.opacity = '1';
       cursorGlow.style.left = e.clientX + 'px';
       cursorGlow.style.top = e.clientY + 'px';
