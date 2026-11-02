@@ -72,7 +72,7 @@ window.addEventListener('load', async () => {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
       check(getComputedStyle(document.querySelector('.tab-indicator')).transitionDuration === '0s', 'reduced motion transitions disabled');
       check(getComputedStyle(document.querySelector('.project-card')).animationName === 'none', 'reduced motion entrance disabled');
-      check(document.getElementById('bgVideo').paused, 'reduced motion video paused');
+      check(getComputedStyle(document.querySelector('.fog')).animationName === 'none', 'reduced motion fog stopped');
     }
     document.body.dataset.test = 'PASS';
   } catch (error) { document.body.dataset.test = 'FAIL: ' + error.message; }
@@ -82,8 +82,8 @@ try {
   const file = path.join(dir, 'test.html');
   // Avoid external dependencies/network in a deterministic interaction test.
   fs.writeFileSync(file, html.replace(/<link[^>]*>/g, '').replace(/<source[^>]*>/g, '').replace(/<img[^>]*>/g, '').replace('</body>', checks + '</body>'));
-  for (const width of [375, 1024]) for (const reduced of [false, true]) {
-    const result = spawnSync(browser, ['--headless', '--no-sandbox', '--disable-gpu', '--allow-file-access-from-files', `--window-size=${width},900`, ...(reduced ? ['--force-prefers-reduced-motion=reduce'] : []), '--dump-dom', '--virtual-time-budget=1000', 'file://' + file], { encoding: 'utf8', timeout: 15000 });
+  for (const [width, height] of [[375, 667], [375, 900], [1024, 900]]) for (const reduced of [false, true]) {
+    const result = spawnSync(browser, ['--headless', '--no-sandbox', '--disable-gpu', '--allow-file-access-from-files', `--window-size=${width},${height}`, ...(reduced ? ['--force-prefers-reduced-motion=reduce'] : []), '--dump-dom', '--virtual-time-budget=1000', 'file://' + file], { encoding: 'utf8', timeout: 15000 });
     assert.equal(result.status, 0, result.stderr);
     assert.ok(result.stdout.includes('data-test="PASS"'), result.stdout.match(/data-test="[^"]*"/)?.[0] || result.stderr);
     console.log(`PASS ${width}px, reduced-motion=${reduced}: entry, keyboard, rapid tabs, links, touch targets, overflow`);
