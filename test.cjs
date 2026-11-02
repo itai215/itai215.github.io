@@ -8,9 +8,25 @@ const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const syntax = spawnSync(process.execPath, ['--check'], { input: script, encoding: 'utf8' });
 assert.equal(syntax.status, 0, syntax.stderr);
-for (const name of ['MultiTool', 'AHK-mw', 'Itzhak-navon', 'artix-bspwm-dotfiles']) {
-  assert.ok(html.includes(`href="https://github.com/itai215/${name}"`));
+const projects = [
+  ['Hunter Worlds', 'https://hunterworld.space/'],
+  ['Political World', 'https://discord.com/invite/6G7dU3k3Zc'],
+  ['LexiGPT', 'https://discord.gg/t3WAAPPq2j'],
+];
+for (const [name, url] of projects) {
+  assert.ok(html.includes(`href="${url}"`), name);
+  assert.ok(html.includes(`${name} ↗`), name);
 }
+for (const removed of ['MultiTool', 'AHK-mw', 'Itzhak-navon', 'artix-bspwm-dotfiles', 'Кабилджон', 'track-title', 'badge-chip', 'badge-icon', 'HypeSquad', 'project-tag', 'Боты & Автоматизация', 'FastAPI', 'Redis', 'SQLite', 'SQLAlchemy']) {
+  assert.ok(!html.includes(removed), `removed: ${removed}`);
+}
+assert.ok(html.includes('disnake, Discordeno, JavaScript'));
+assert.ok(html.includes('SQL, MongoDB, PostgreSQL'));
+assert.ok(html.includes('href="https://funpay.com/users/9685101/"'));
+assert.ok(html.includes('-webkit-tap-highlight-color: transparent'));
+assert.ok(html.includes(':focus-visible { outline: 2px solid'));
+assert.ok(html.includes('id="audioTrack"'));
+assert.ok(html.includes('id="playBtn"'));
 assert.ok(!html.includes('title="Online"'));
 const browser = process.argv[2];
 if (!browser) {
@@ -35,7 +51,22 @@ window.addEventListener('load', async () => {
     check(document.querySelectorAll('[aria-selected="true"]').length === 1, 'one selected tab');
     check(document.querySelectorAll('[role="tabpanel"]:not([hidden])').length === 1, 'one visible panel');
     check(!document.getElementById('tab-projects').hidden, 'rapid selection ends on projects');
-    check(document.querySelectorAll('.project-card[href]').length === 4, 'four project links');
+    const cards = [...document.querySelectorAll('.project-card[href]')];
+    check(cards.length === 3, 'three project links');
+    check(JSON.stringify(cards.map(card => [card.querySelector('.project-name').textContent.replace(' ↗', ''), card.href])) === JSON.stringify(${JSON.stringify(projects)}), 'requested project links');
+    const socials = [...document.querySelectorAll('#tab-main .social-btn')].map(link => link.href);
+    check(socials.includes('https://funpay.com/users/9685101/'), 'FunPay in bio');
+    check(socials.includes('https://github.com/itai215'), 'personal GitHub preserved');
+    check(socials.includes('https://steamcommunity.com/id/mastyrbist'), 'personal Steam preserved');
+    check(!socials.some(url => url.includes('discord')), 'server invite moved out of bio');
+    const skills = [...document.querySelectorAll('.skill-desc')].map(card => card.textContent);
+    check(skills.length === 3 && skills[0] === 'disnake, Discordeno, JavaScript' && skills[1] === 'SQL, MongoDB, PostgreSQL', 'requested stack only');
+    check(document.getElementById('audioTrack') && document.getElementById('playBtn'), 'music retained');
+    for (const control of document.querySelectorAll('a, button, input, .progress-bar-wrap')) {
+      check(getComputedStyle(control).webkitTapHighlightColor === 'rgba(0, 0, 0, 0)', 'no blue tap highlights');
+    }
+    tabs[0].focus();
+    check(getComputedStyle(tabs[0]).outlineStyle === 'solid', 'keyboard focus ring retained');
     for (const tab of tabs) check(tab.getBoundingClientRect().height >= 44, '44px touch targets');
     check(document.documentElement.scrollWidth <= innerWidth, 'no horizontal overflow');
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
