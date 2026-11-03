@@ -75,6 +75,13 @@ window.addEventListener('load', async () => {
       check(getComputedStyle(document.querySelector('.project-card')).animationName === 'none', 'reduced motion entrance disabled');
       check(getComputedStyle(document.querySelector('.bg-image')).animationName === 'none', 'reduced motion background stopped');
     }
+    const fx = document.getElementById('effectsBtn');
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    check(fx.getAttribute('aria-pressed') === String(!reduced), 'effects respect motion preference');
+    if (!reduced) check(getComputedStyle(document.querySelector('.rain')).animationName === 'rainfall-back', 'rain animates');
+    fx.click();
+    check(document.body.classList.contains('effects-off') === !reduced, 'effects toggle updates scene');
+    fx.click();
     document.body.dataset.test = 'PASS';
   } catch (error) { document.body.dataset.test = 'FAIL: ' + error.message; }
 });

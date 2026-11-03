@@ -17,7 +17,8 @@
       --bg: #080b13;
       --text: #f3f5ff;
       --text-muted: #b2bbcf;
-      --accent: #b8c9ff;
+      --accent: #75e4ef;
+      --rose: #ee8fc5;
       --line: rgba(199, 213, 255, .15);
       --surface: rgba(170, 189, 235, .055);
       --font-main: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -27,15 +28,15 @@
     body { min-height: 100svh; display: grid; place-items: center; background: var(--bg); color: var(--text); font-family: var(--font-main); overflow-x: hidden; }
     .bg-layer, .bg-overlay { position: fixed; inset: 0; pointer-events: none; }
     .bg-layer { overflow: hidden; }
-    .bg-image { position: absolute; inset: -3%; background: url('assets/bg.jpg') center 65% / cover; filter: saturate(.55) brightness(.85); animation: drift 30s ease-in-out infinite alternate; }
+    .bg-image { position: absolute; inset: -3%; background: url('assets/bg.jpg') center 65% / cover; filter: saturate(1.1) brightness(.88); animation: drift 30s ease-in-out infinite alternate; }
     .bg-overlay { background: linear-gradient(180deg, rgba(7,10,20,.3), rgba(7,10,20,.12) 50%, rgba(7,10,20,.62)), radial-gradient(ellipse at center, transparent 25%, rgba(7,10,20,.4)); }
     @keyframes drift { to { transform: scale(1.04) translateY(-1%); } }
     .container { position: relative; width: min(100%, 580px); padding: 36px 20px; z-index: 1; }
-    .profile-card { position: relative; padding: 36px 30px 24px; border: 1px solid var(--line); border-radius: 28px; background: linear-gradient(145deg, rgba(37,44,66,.74), rgba(12,17,31,.8)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 28px 90px #0008, inset 0 1px 0 #ffffff12; }
+    .profile-card { position: relative; padding: 36px 30px 24px; border: 1px solid var(--line); border-radius: 28px; background: linear-gradient(135deg, rgba(17,42,52,.8), rgba(17,19,34,.84) 48%, rgba(47,22,45,.78)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 28px 90px #0008, inset 0 1px 0 #ffffff12; }
     .profile-card::before { content: ''; position: absolute; top: -1px; left: 15%; right: 15%; height: 1px; background: linear-gradient(90deg, transparent, #d3ddff8c, transparent); }
     .profile-header { display: flex; flex-direction: column; align-items: center; text-align: center; }
     .avatar-wrapper { position: relative; width: 104px; height: 104px; margin-bottom: 20px; }
-    .avatar-ring { position: absolute; inset: -4px; border-radius: 50%; background: conic-gradient(from 0deg, #c1d0ff, #8b98cf33 25%, #7b8abd 50%, #d7e1ff33 75%, #c1d0ff); animation: rotateRing 14s linear infinite; box-shadow: 0 0 30px #a5bcff30; }
+    .avatar-ring { position: absolute; inset: -4px; border-radius: 50%; background: conic-gradient(from 0deg, var(--accent), #75e4ef22 25%, var(--rose) 50%, #ee8fc522 75%, var(--accent)); animation: rotateRing 14s linear infinite; box-shadow: -8px 0 32px #75e4ef35, 8px 0 32px #ee8fc535; }
     @keyframes rotateRing { to { transform: rotate(360deg); } }
     .avatar-img { position: relative; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 4px solid #20283d; }
     .username { font-size: clamp(2rem, 6vw, 2.45rem); font-weight: 800; letter-spacing: -.055em; text-shadow: 0 0 32px #b5caff45; }
@@ -103,6 +104,35 @@
       .volume-slider { width: 44px; }
       .copy-badge { font-size: .65rem; }
     }
+    /* Slow light and mist frame the card; rain stays behind readable content. */
+    .city-glow { position: absolute; inset: -15%; background: radial-gradient(ellipse at 15% 65%, #26c6da3d, transparent 42%), radial-gradient(ellipse at 85% 40%, #eb51a838, transparent 40%); mix-blend-mode: screen; animation: neon-drift 12s ease-in-out infinite alternate; }
+    .rain { position: absolute; inset: -240px -100px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg stroke='%23b7e5f4' stroke-width='.8' stroke-linecap='round' opacity='.5'%3E%3Cpath d='M24 12l-7 30M92 65l-5 22M174 5l-7 32M221 120l-6 27M46 163l-5 23M138 191l-7 33'/%3E%3C/g%3E%3C/svg%3E"); animation: rainfall 1.1s linear infinite; opacity: .42; }
+    .rain-back { background-size: 180px 180px; animation-duration: 1.8s; opacity: .25; }
+    .mist { position: absolute; inset: 30% -30% -25%; background: radial-gradient(ellipse at 25% 70%, #60c5d426, transparent 48%), radial-gradient(ellipse at 75% 60%, #d279b321, transparent 44%); filter: blur(25px); animation: mist-drift 18s ease-in-out infinite alternate; }
+    @keyframes rainfall { to { transform: translate(-56px, 240px); } }
+    @keyframes neon-drift { to { transform: translate(3%, -3%) scale(1.05); opacity: .65; } }
+    @keyframes mist-drift { to { transform: translateX(10%); } }
+    .rain-back { --rain-distance: 180px; }
+    .rain-back { animation-name: rainfall-back; }
+    @keyframes rainfall-back { to { transform: translate(-42px, 180px); } }
+    .profile-card { box-shadow: -16px 0 65px #36cbdb15, 18px 0 65px #e56aa91c, 0 28px 90px #0008, inset 0 1px 0 #ffffff12; }
+    .profile-card::before { left: 5%; right: 5%; background: linear-gradient(90deg, transparent, #75e4efaa, #ee8fc5aa, transparent); }
+    body.entered .profile-card { animation: card-arrive .95s cubic-bezier(.16,1,.3,1) both; }
+    @keyframes card-arrive { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: none; } }
+    .username { text-shadow: -3px 0 24px #75e4ef55, 3px 0 24px #ee8fc550; }
+    .tab-indicator { background: linear-gradient(120deg, #75e4ef20, #ee8fc51a); box-shadow: inset 0 0 0 1px #75e4ef30, 0 3px 12px #0002; }
+    .tab-pane.active > * { animation: reveal .45s cubic-bezier(.16,1,.3,1) both; }
+    .tab-pane.active > :nth-child(2) { animation-delay: .06s; }
+    .tab-pane.active > :nth-child(3) { animation-delay: .12s; }
+    .social-btn:hover { box-shadow: 0 6px 28px #75e4ef16; border-color: #75e4ef60; }
+    .project-card:hover, .discord-box:hover { border-color: #ee8fc55c; background: #ee8fc50c; }
+    .progress-bar { background: linear-gradient(90deg, var(--accent), var(--rose)); }
+    .effects-btn { position: absolute; top: 15px; right: 15px; min-width: 60px; min-height: 44px; border: 0; border-radius: 10px; background: transparent; color: var(--text-muted); font: .65rem var(--font-mono); cursor: pointer; }
+    .effects-btn span { color: var(--accent); }
+    .effects-btn:hover { background: #ffffff08; }
+    .effects-off *, .effects-off *::before, .effects-off *::after { animation: none !important; }
+    .effects-off :is(.rain, .mist, .city-glow) { display: none; }
+    @media (max-width: 640px) { .rain-front { opacity: .28; } .mist { filter: none; } }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
     }
@@ -113,23 +143,29 @@
   <!-- Background Image with Zoom and Lighting Vignette -->
   <div class="bg-layer" aria-hidden="true">
     <div class="bg-image"></div>
+    <div class="city-glow"></div>
+    <div class="rain rain-back"></div>
+    <div class="rain rain-front"></div>
+    <div class="mist"></div>
   </div>
   <div class="bg-overlay" aria-hidden="true"></div>
 
   <!-- Click to Enter Screen -->
   <button id="enterScreen" class="enter-screen" type="button" autofocus>
     <span class="enter-text">mamont1k</span>
-    <span class="enter-sub">Нажми, чтобы войти</span>
+    <span class="enter-sub">Нажми, чтобы войти со звуком</span>
   </button>
 
   <!-- Audio Track -->
   <audio id="audioTrack" loop preload="none">
-    <source src="assets/blue-hour.mp3" type="audio/mpeg">
+    <source src="assets/stay-at-your-house.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Main Card -->
   <main class="container" inert>
     <div class="profile-card">
+
+      <button id="effectsBtn" class="effects-btn" type="button" aria-pressed="true" aria-label="Атмосферные эффекты">FX <span>ON</span></button>
 
       <!-- Header Section -->
       <div class="profile-header">
@@ -299,7 +335,7 @@
 
     audio.addEventListener('play', syncPlayer);
     audio.addEventListener('pause', syncPlayer);
-    audio.addEventListener('error', () => { audio.pause(); syncPlayer(); });
+    audio.addEventListener('error', () => { audio.pause(); syncPlayer(); showToast('Не удалось загрузить музыку. Попробуй ещё раз.'); });
 
     function togglePlay() {
       if (audio.paused) {
@@ -336,8 +372,20 @@
       enterScreen.classList.add('hidden');
       document.querySelector('main').inert = false;
       document.querySelector('.tab-btn.active').focus();
-      // Music starts only from the player, not from the entry screen.
+      document.body.classList.add('entered');
+      audio.play().catch(syncPlayer);
     });
+
+    const effectsBtn = document.getElementById('effectsBtn');
+    const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+    function setEffects(enabled) {
+      document.body.classList.toggle('effects-off', !enabled);
+      effectsBtn.setAttribute('aria-pressed', String(enabled));
+      effectsBtn.querySelector('span').textContent = enabled ? 'ON' : 'OFF';
+    }
+    setEffects(!motionPreference.matches);
+    motionPreference.addEventListener('change', event => setEffects(!event.matches));
+    effectsBtn.addEventListener('click', () => setEffects(effectsBtn.getAttribute('aria-pressed') !== 'true'));
 
     // Tabs
     const tabBtns = document.querySelectorAll('.tab-btn');
